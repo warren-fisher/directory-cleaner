@@ -2,14 +2,14 @@ import time
 import shutil
 import os 
  
-dirname = r'c:\Users\warren\Downloads' # drive letter and then colon, r in front denotes raw string 
-dirname_unix = '' # can work with any path, ex free space in directory
+dirname = r'c:\Users\warren\Downloads'
 delete_older_than = [3600*6, 3600*3] # in seconds, always deletes older than 
 percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
-incl_folders = True
-incl_files = True 
+incl_folders = True # Should this delete folders
+incl_files = True # Should this delete files 
 
-def delete_files(paths, include_folders, include_files=True): # fix for deleting folders and files 
+def delete_files(paths, include_folders=False, include_files=True): 
+	""" Delete files and folders within the input list of form [files, folders]. """
 	files, folders = paths
 	for file in files:
 		try: 
@@ -22,7 +22,6 @@ def delete_files(paths, include_folders, include_files=True): # fix for deleting
 		except OSError as e: 
 			print("No folder error: {} - {}".format(e.filename, e.strerror))
 		
-	
 def older_than_decorate(func): 
 	"""Decorator for the directory_list function. Wraps a file age test. """
 	def wrapper(dirname, older_than = 7*24*60*60, *args, **kwargs):
@@ -66,8 +65,8 @@ def directory_list(dirname, include_files = True, include_folders = False):
 
 	
 if __name__ == '__main__': 
-	disk_info = shutil.disk_usage(dirname)
-	if disk_info[2]/disk_info[0] >= percent_full_delete_threshold: 
+	disk_info = shutil.disk_usage(dirname) # Named tuple usage(total, used, free) 
+	if disk_info[2]/disk_info[0] >= percent_full_delete_threshold:
 		paths = directory_list(dirname, delete_older_than[1], incl_files, incl_folders)
 	else: 
 		paths = directory_list(dirname, delete_older_than[0], incl_files, incl_folders)
