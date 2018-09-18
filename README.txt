@@ -1,4 +1,4 @@
-# Directory-cleaner-by-age 
+# Directory-clean-by-age 
  A python script to delete files and or folders over a certain age within a directory 
 
 ## Features 
