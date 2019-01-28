@@ -5,8 +5,12 @@ import os
 dirname = r'c:\Users\warren\Downloads'
 delete_older_than = [3600*6, 3600*3] # in seconds, always deletes older than 
 percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
-incl_folders = True # Should this delete folders
-incl_files = True # Should this delete files 
+incl_folders = True # Delete folders
+incl_files = True # Delete files 
+
+# Should only choose one of the following options, not both
+incl_file_type = () # Delete files of extension type .xyz
+excl_file_type = () # Delete all files except for extension type .xyz 
 
 def delete_files(paths, include_folders=False, include_files=True): 
 	""" Delete files and folders within the input list of form [files, folders]. """
@@ -21,13 +25,27 @@ def delete_files(paths, include_folders=False, include_files=True):
 			shutil.rmtree(folder)
 		except OSError as e: 
 			print("No folder error: {} - {}".format(e.filename, e.strerror))
-		
+
+def extension(paths, incl_file_type=(), excl_file_type=()): # Work on implementing this into wrapper
+	files, folders = paths
+	files_to_delete = []
+	if incl_file_type is not ():
+		for file in files:
+			if file.lower().endswith(incl_file_type) == True:
+				files_to_delete.append(file)
+	elif excl_file_type is not ():
+		for file in files:
+			if file.lower().endswith(incl_file_type) == True:
+				files_to_delete.append(file)
+	else:
+		return paths # If there are no blacklist/whitelist options return original files/folder locations
+	return [files_to_delete, folders]				
+
 def older_than_decorate(func): 
 	"""Decorator for the directory_list function. Wraps a file age test. """
 	def wrapper(dirname, older_than = 7*24*60*60, *args, **kwargs):
 		paths = func(dirname, *args, **kwargs)
-		if len(paths) == 2:
-			files, folders = paths
+		files, folders = paths
 		files_older = []
 		folders_older = []
 		for file in files:
@@ -56,22 +74,20 @@ def directory_list(dirname, include_files = True, include_folders = False):
 	if include_files == True: 
 		onlyfiles = [f for f in os.listdir(dirname) if os.path.isfile(os.path.join(dirname, f))]
 		dir.append(onlyfiles)
+	else:
+		dir.append([]) # Append empty list so that it appears there are no files to delete.
 	if include_folders == True: 
 		onlyfolders = [f for f in os.listdir(dirname) if not os.path.isfile(os.path.join(dirname, f))] 
 		dir.append(onlyfolders)
-	if len(dir) == 1: 
-		return dir[0]
+	else:
+		dir.append([]) # Append empty list so that it appears there are no folders to delete.
 	return dir		
 
-	
 if __name__ == '__main__': 
 	disk_info = shutil.disk_usage(dirname) # Named tuple usage(total, used, free) 
 	if disk_info[2]/disk_info[0] >= percent_full_delete_threshold:
 		paths = directory_list(dirname, delete_older_than[1], incl_files, incl_folders)
 	else: 
 		paths = directory_list(dirname, delete_older_than[0], incl_files, incl_folders)
+	paths = extension(paths, incl_file_type, excl_file_type)
 	delete_files(paths, incl_folders, incl_files) 
-	
-		
-
-	
