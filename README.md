@@ -5,8 +5,13 @@
 - Can delete only files and/or only sub-directories
 - Can have two different age thresholds depending on how full the disk is 
 - Can be set to run periodically using task manager 
+- Windows support
 
 ## Planned features
+- Whitelist / blacklist by file type
+- Recursive deletions
+- Use OOP to allow for multiple folders to be tracked with different specifications
+- Test for Linux
 
 ## Installation 
 ### Windows 
