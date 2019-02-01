@@ -3,14 +3,14 @@ import shutil
 import os 
  
 dirname = r'c:\Users\warren\Downloads'
-delete_older_than = [3600*6, 3600*3] # in seconds, always deletes older than 
+delete_older_than = [1, 1] # in seconds, always deletes older than 
 percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
 incl_folders = True # Delete folders
-incl_files = True # Delete files 
+incl_files = True # Delete files
 
 # Should only choose one of the following options, not both
-incl_file_type = () # Delete files of extension type .xyz
-excl_file_type = () # Delete all files except for extension type .xyz 
+incl_file_type = ['.txt'] # Only delete files of extension type .xyz
+excl_file_type = ['.txt'] # Do not delete files with extension type .xyz, overpowers whitelist
 
 def delete_files(paths, include_folders=False, include_files=True): 
 	""" Delete files and folders within the input list of form [files, folders]. """
@@ -26,18 +26,17 @@ def delete_files(paths, include_folders=False, include_files=True):
 		except OSError as e: 
 			print("No folder error: {} - {}".format(e.filename, e.strerror))
 
-def extension(paths, incl_file_type=(), excl_file_type=()): # Work on implementing this into wrapper
+def extension(paths, incl_file_type=[], excl_file_type=[]): # Work on implementing this into wrapper
 	files, folders = paths
 	files_to_delete = []
-	if incl_file_type is not ():
-		for file in files:
-			if file.lower().endswith(incl_file_type) == True:
+	for file in files:
+		for file_type in incl_file_type:
+			if file.lower().endswith(file_type) == True:
 				files_to_delete.append(file)
-	elif excl_file_type is not ():
-		for file in files:
-			if file.lower().endswith(incl_file_type) == True:
-				files_to_delete.append(file)
-	else:
+		for file_type in excl_file_type: 
+			if file.lower().endswith(file_type) == True:
+				files_to_delete.remove(file) 
+	if incl_file_type == excl_file_type == []:
 		return paths # If there are no blacklist/whitelist options return original files/folder locations
 	return [files_to_delete, folders]				
 
