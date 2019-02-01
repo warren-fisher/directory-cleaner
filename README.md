@@ -46,9 +46,9 @@ Linux support is not currently supported. Use at your own risk.
 ## Planned features
 - [x] indicates that a feature is in progress
 - [x] Whitelist / blacklist by file type
-- [] Recursive deletions
-- [] Use OOP to allow for multiple folders to be tracked with different specifications
-- [] CLI for adding folders, changing specifications 
-- [] Allow for using functions to determine how old files can be given the percent full your disk is
-- [] Linux support
-- [] Build Windows/Linux GUI for settings as an alternative to CLI 
+- [ ] Recursive deletions
+- [ ] Use OOP to allow for multiple folders to be tracked with different specifications
+- [ ] CLI for adding folders, changing specifications 
+- [ ] Allow for using functions to determine how old files can be given the percent full your disk is
+- [ ] Linux support
+- [ ] Build Windows/Linux GUI for settings as an alternative to CLI 
