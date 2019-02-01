@@ -44,7 +44,7 @@ Your script should now be set to run automatically. You can also run the python 
 Linux support is not currently supported. Use at your own risk. 
 
 ## Planned features
-[x] indicates that a feature is in progress
+- [x] indicates that a feature is in progress
 - [x] Whitelist / blacklist by file type
 - [] Recursive deletions
 - [] Use OOP to allow for multiple folders to be tracked with different specifications
