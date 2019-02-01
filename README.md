@@ -8,6 +8,7 @@
 - Windows support
 
 ## Getting Started
+Getting started is easy. This script has no dependancies other than Python3. It is not currently on Pip. 
 
 ### Prerequisites
 Python 3.6.5 is supported. 
@@ -29,7 +30,7 @@ Only standard library modules are used.
     - Select 'On a schedule' for desired method to start
     - Set it as one time
     - Select 'repeat task every:' and select a desired frequency and duration of this script
-    - (Optional) Select 'stop task if it runs longer than' and select a time if you would like it to not run in the background otherwise
+    - (Optional) Select 'stop task if it runs longer than' and select a time if you would like it to not run in the background for longer than a specified time. 
     - Make sure enabled is selected 
 - Navigate to actions and add a new action 
 - Select 'Start a program' and 
@@ -43,10 +44,11 @@ Your script should now be set to run automatically. You can also run the python 
 Linux support is not currently supported. Use at your own risk. 
 
 ## Planned features
-- Whitelist / blacklist by file type
-- Recursive deletions ?? 
-- Use OOP to allow for multiple folders to be tracked with different specifications
-- CLI for adding folders, changing specifications 
-- Allow for using functions to determine how old files can be given the percent full your disk is
-- Linux support
-- Build Windows/Linux GUI for settings as an alternative to CLI 
+[x] indicates that a feature is in progress
+- [x] Whitelist / blacklist by file type
+- [] Recursive deletions
+- [] Use OOP to allow for multiple folders to be tracked with different specifications
+- [] CLI for adding folders, changing specifications 
+- [] Allow for using functions to determine how old files can be given the percent full your disk is
+- [] Linux support
+- [] Build Windows/Linux GUI for settings as an alternative to CLI 
