@@ -15,7 +15,7 @@ The first value applies always and the second value applied for when the disk is
 incl_folders and incl_files are for setting whether script will delete folders, files or both 
 """
 dirname = r'c:\Users\warren\Downloads'
-percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
+percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. Set to NONE to disable feature. 
 delete_older_than = [60*60*24*12, 60*60*24*6] # Time, in seconds, before a file is deleted. The first value applied always, the second for when your disk is atleast as full as specified.
 incl_folders = True # Should this delete folders
 incl_files = True # Should this delete files 
