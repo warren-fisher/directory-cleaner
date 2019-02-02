@@ -16,12 +16,12 @@ incl_folders and incl_files are for setting whether script will delete folders, 
 """
 dirname = r'c:\Users\warren\Downloads'
 percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
-delete_older_than = [60*60*24*12, 60*60*24*6] # Time, in seconds, before a file is deleted. The first value applied always, the second for when your disk is atleast as full as specified.
+delete_older_than = [1, 1] # Time, in seconds, before a file is deleted. The first value applied always, the second for when your disk is atleast as full as specified.
 incl_folders = True # Should this delete folders
 incl_files = True # Should this delete files 
 
 # Should probably only choose one of the following options, not both
-incl_file_type = ['.txt'] # Only delete files of extension type .xyz
+incl_file_type = [] # Only delete files of extension type .xyz
 excl_file_type = ['.txt'] # Do not delete files with extension type .xyz, overpowers whitelist
 
 def delete_files(paths, include_folders=False, include_files=True): 
@@ -41,15 +41,23 @@ def delete_files(paths, include_folders=False, include_files=True):
 def extension(paths, incl_file_type=[], excl_file_type=[]): # Work on implementing this into wrapper
 	files, folders = paths
 	files_to_delete = []
-	for file in files:
-		for file_type in incl_file_type:
-			if file.lower().endswith(file_type) == True:
-				files_to_delete.append(file)
-		for file_type in excl_file_type: 
-			if file.lower().endswith(file_type) == True:
-				files_to_delete.remove(file) 
 	if incl_file_type == excl_file_type == []:
 		return paths # If there are no blacklist/whitelist options return original files/folder locations
+	for file in files:
+		if incl_file_type == []: 
+			files_to_delete = files
+		else:
+			for file_type in incl_file_type:
+				if file.lower().endswith(file_type) == True:
+					files_to_delete.append(file)
+		for file_type in excl_file_type: 
+			try:
+				if file.lower().endswith(file_type) == True:
+					files_to_delete.remove(file)
+			except ValueError:
+			# If a file is not in the files_to_delete list it will throw this error.
+			# This can happen if a user sets a whitelist as well as a blacklist with different file extension types. 
+				print("Error: You set a whitelist and blacklist at the same time, which is not recommended") 
 	return [files_to_delete, folders]				
 
 def older_than_decorate(func): 
