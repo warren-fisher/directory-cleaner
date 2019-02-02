@@ -16,9 +16,13 @@ incl_folders and incl_files are for setting whether script will delete folders, 
 """
 dirname = r'c:\Users\warren\Downloads'
 percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
-delete_older_than = [60*60*24*12, 60*60*24*6] # Time, in seconds, before a file is deleted. The first value applied always, the second for when your disk is atleast as full as specified.
+delete_older_than = [60*60*24*30, 60*60*24*15] # Time, in seconds, before a file is deleted. The first value applied always, the second for when your disk is atleast as full as specified.
 incl_folders = True # Should this delete folders
 incl_files = True # Should this delete files 
+
+# Should probably only choose one of the following options, not both
+incl_file_type = [] # Only delete files of extension type .xyz
+excl_file_type = ['.txt'] # Do not delete files with extension type .xyz, overpowers whitelist
 
 def delete_files(paths, include_folders=False, include_files=True): 
 	""" Delete files and folders within the input list of form [files, folders]. """
@@ -33,13 +37,34 @@ def delete_files(paths, include_folders=False, include_files=True):
 			shutil.rmtree(folder)
 		except OSError as e: # If the folder does not exist we will get this error. 
 			print("No folder error: {} - {}".format(e.filename, e.strerror))
-		
+
+def extension(paths, incl_file_type=[], excl_file_type=[]): # Work on implementing this into wrapper
+	files, folders = paths
+	files_to_delete = []
+	if incl_file_type == excl_file_type == []:
+		return paths # If there are no blacklist/whitelist options return original files/folder locations
+	for file in files:
+		if incl_file_type == []: 
+			files_to_delete = files
+		else:
+			for file_type in incl_file_type:
+				if file.lower().endswith(file_type) == True:
+					files_to_delete.append(file)
+		for file_type in excl_file_type: 
+			try:
+				if file.lower().endswith(file_type) == True:
+					files_to_delete.remove(file)
+			except ValueError:
+			# If a file is not in the files_to_delete list it will throw this error.
+			# This can happen if a user sets a whitelist as well as a blacklist with different file extension types. 
+				print("Error: You set a whitelist and blacklist at the same time, which is not recommended") 
+	return [files_to_delete, folders]				
+
 def older_than_decorate(func): 
 	"""Decorator for the directory_list function. Wraps a file age test. """
 	def wrapper(dirname, older_than = 7*24*60*60, *args, **kwargs):
 		paths = func(dirname, *args, **kwargs) # Call our directory_list function to return a list of all files and folders (non-recursive) in format [filers, folders].
-		if len(paths) == 2:
-			files, folders = paths
+		files, folders = paths
 		files_older = []
 		folders_older = []
 		for file in files:
@@ -68,13 +93,15 @@ def directory_list(dirname, include_files = True, include_folders = False):
 	if include_files == True: 
 		onlyfiles = [f for f in os.listdir(dirname) if os.path.isfile(os.path.join(dirname, f))]
 		dir.append(onlyfiles)
+	else:
+		dir.append([]) # Append empty list so that it appears there are no files to delete.
 	if include_folders == True: 
 		onlyfolders = [f for f in os.listdir(dirname) if not os.path.isfile(os.path.join(dirname, f))] 
 		dir.append(onlyfolders)
-	if len(dir) == 1: 
-		return dir[0]
+	else:
+		dir.append([]) # Append empty list so that it appears there are no folders to delete.
 	return dir		
-	
+
 if __name__ == '__main__': 
 	disk_info = shutil.disk_usage(dirname) # Named tuple usage(total, used, free)
 	try:
@@ -85,4 +112,6 @@ if __name__ == '__main__':
 			paths = directory_list(dirname, delete_older_than[0], incl_files, incl_folders)
 	except ValueError: # If percent_full_delete_threshold is not an integer than we know the user does not want that feature enabled. Act like it wasnt full enough. 
 		paths = directory_list(dirname, delete_older_than[0], incl_files, incl_folders)
+	paths = extension(paths, incl_file_type, excl_file_type)
 	delete_files(paths, incl_folders, incl_files) 
+
