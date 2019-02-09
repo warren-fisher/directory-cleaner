@@ -16,25 +16,39 @@ incl_folders and incl_files are for setting whether script will delete folders, 
 """
 dirname = r'c:\Users\warren\Downloads'
 percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
-delete_older_than = [1, 1] # Time, in seconds, before a file is deleted. The first value applied always, the second for when your disk is atleast as full as specified.
-incl_folders = True # Should this delete folders
+delete_older_than = 1 # Time, in seconds, before a file is deleted.
+incl_folders = False # Should this delete folders
 incl_files = True # Should this delete files 
 
 # Should probably only choose one of the following options, not both
-incl_file_type = [] # Only delete files of extension type .xyz
-excl_file_type = ['.txt'] # Do not delete files with extension type .xyz, overpowers whitelist
+extensions = ['.txt'] # File extensions to use in blacklist OR whitelist
+whitelist = True 
+blacklist = False
 
 class Directory():
 	"""
 	A directory class is created so that class instances can be created to track user preferences of multiple directories.
 	"""
-	def __init__(self, path, incl_files, incl_folders, **kwargs):
+	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, whitelist = None, blacklist = None, **kwargs):
 		self.path = path
 		self.incl_files = incl_files
 		self.incl_folders = incl_folders
 
+		# A whitelist takes priority over a blacklist 
+		self.extensions = extensions
+		if whitelist is not None:
+			self.whitelist = whitelist
+		else: 
+			self.whitelist = False
+		if blacklist is not None and whitelist is None:
+			self.blacklist = blacklist
+		else:
+			self.blacklist = False
+			
 		disk_info = shutil.disk_usage(dirname) # Named tuple = usage(total, used, free)
 		self.percent_full = disk_info[2]/disk_info[0]
+
+		self.delete_older_than = delete_older_than
 
 		st = os.stat(self.path) # Creates a temporary named tuple
 
@@ -60,15 +74,15 @@ class Directory():
 			elif folder.recursive == False: 
 				return
 
-		if self.incl_files == True:
+		if self.incl_files == True: 
 			self.delete_files()
 
 		try:
 			self.depth
-			if self.incl_files == True: 	
+			if self.incl_folders == True: 	
 				self.delete()
 		except AttributeError: 
-			# If we get an attribute error we know that this is the base directory, we don't want to delete it! 
+			# If we get an attribute error we know that this is the base directory, since the depth is not set yet - we don't want to delete it! 
 			pass 
 
 	def get_folders(self):
@@ -83,9 +97,9 @@ class Directory():
 			if not os.path.isfile(os.path.join(self.path, f)):
 				try:
 					self.depth
-					self.folders.append(Directory(os.path.join(self.path, f), self.incl_files, self.incl_folders, depth = self.depth+1, recursive = True))
-				except AttributeError: 
-					self.folders.append(Directory(os.path.join(self.path, f), self.incl_files, self.incl_folders, depth = 1, recursive = True))
+					self.folders.append(Directory(os.path.join(self.path, f), self.incl_files, self.incl_folders, self.delete_older_than, self.extensions, depth = self.depth+1, recursive = True, whitelist = self.whitelist, blacklist = self.blacklist))
+				except AttributeError: # We get this error if there is no self.depth attribute (e.g it is the base directory and we haven't set its depth yet)
+					self.folders.append(Directory(os.path.join(self.path, f), self.incl_files, self.incl_folders, self.delete_older_than, self.extensions, depth = 1, recursive = True, whitelist = self.whitelist, blacklist = self.blacklist))
 
 	def delete_files(self):
 		"""
@@ -93,8 +107,28 @@ class Directory():
 		First calls get_files() to create the class attribute files, and then deletes all files older than the required age. 
 		"""
 		self.get_files()
+
 		for file in self.files:
-			if file.age >= delete_older_than[0]:
+			delete = False
+
+			if file.age >= self.delete_older_than:
+				delete = True
+
+			try: 
+				if self.whitelist == True: 
+					if file.extension not in self.extensions: 
+						delete = False
+			except AttributeError:
+				pass 
+
+			try: 
+				if self.blacklist == True and self.whitelist in [False, None]: 
+					if file.extension in self.extensions: 
+						delete = False
+			except AttributeError: 
+				pass 
+			
+			if delete == True: 
 				file.delete()
 
 	def get_files(self):
@@ -146,5 +180,5 @@ class File():
 			print("No file error: {} - {}".format(e.filename, e.strerror))
 
 if __name__ == '__main__': 
-	dir = Directory(dirname, incl_files, incl_folders, recursive = True)
+	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, whitelist=True, recursive = True)
 	dir.recursive_directories()
