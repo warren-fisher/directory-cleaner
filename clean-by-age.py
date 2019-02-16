@@ -26,9 +26,6 @@ whitelist = True
 blacklist = False
 
 class Directory():
-	"""
-	A directory class is created so that class instances can be created to track user preferences of multiple directories.
-	"""
 	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, whitelist = None, blacklist = None, **kwargs):
 		self.path = path
 		self.incl_files = incl_files
@@ -87,10 +84,11 @@ class Directory():
 
 	def get_folders(self):
 		"""
-		Method to list all subdirectories within the base directory.
-		Creates a new class instance for each folder. 
-		Not done at class initiation because it will create class instances, and therefore ages, for each folder. 
-		If the age were not done at script runtime then the folder age would be outdated. 
+		Method to append all the Directory objects of the folders in the base directory to a class attribute.
+
+		For each folder in the directory a Directory class instance is created and then appended to the folders class attribute of the Directory instance. 
+		By default the Directory instances inherit the same directory specifications as defined in __init__. 
+		This method is only called directly before doing anything with the folder because it initiates a class instance and therefore determines the Directory instance age.  
 		"""
 		self.folders = [] 
 		for f in os.listdir(self.path):
@@ -103,8 +101,10 @@ class Directory():
 
 	def delete_files(self):
 		"""
-		Method called by recursive_directories() to delete files.
-		First calls get_files() to create the class attribute files, and then deletes all files older than the required age. 
+		Method to delete files if they meet the criteria defined in the Directory instance.
+
+		Calls get_files() so that the files class attribute is populated with File instances. 
+		For each File instance it checks that it meets the file age and blacklist/whitelist criteria for file extension, as defined in the Directory instance, and then deletes the file.
 		"""
 		self.get_files()
 
@@ -118,7 +118,7 @@ class Directory():
 				if self.whitelist == True: 
 					if file.extension not in self.extensions: 
 						delete = False
-			except AttributeError:
+			except AttributeError: # An attribute error is raised if the whitelist is not set
 				pass 
 
 			try: 
@@ -133,8 +133,10 @@ class Directory():
 
 	def get_files(self):
 		"""
-		Method to list all files in the base directory. 
-		We only call this method when we are going to delete files because it creates class instances for each file and therefore their file age. 
+		Method to append all the File objects of the files in the base directory to a class attribute. 
+
+		For each file in the directory a File class instance is created and then appended to the files class attribute of the Directory instance.
+		This is only called directly before deleting files because when creating the class instance for each file the File age is set. 
 		"""
 		self.files = []
 		for f in os.listdir(self.path):
@@ -142,9 +144,7 @@ class Directory():
 				self.files.append(File(os.path.join(self.path, f)))
 
 	def delete(self):
-		"""
-		Method to delete the directory. 
-		"""
+		"""Method to delete the directory."""
 		try:
 			shutil.rmtree(self.path)
 		except OSError as e: # If the folder does not exist we will get this error. 
