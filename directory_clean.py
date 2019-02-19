@@ -2,6 +2,9 @@ import time
 import shutil
 import os 
  
+#TODO: Tests
+
+
 """
 The following are user settings. 
 
@@ -27,6 +30,7 @@ blacklist = False
 
 class Directory():
 	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, whitelist = None, blacklist = None, **kwargs):
+		"""A directory class is created so that class instances can be created to track user preferences of multiple directories."""
 		self.path = path
 		self.incl_files = incl_files
 		self.incl_folders = incl_folders
@@ -56,7 +60,7 @@ class Directory():
 		for key, value in kwargs.items():
 			setattr(self, key, value)
 
-	def recursive_directories(self):
+	def deletion_process(self):
 		"""
 		Outside function to be called to initiate deleting of files. 
 		First it checks if recursive directory mode is enabled, and if so recalls itself.  
@@ -67,7 +71,7 @@ class Directory():
 		self.get_folders()
 		for folder in self.folders:
 			if folder.recursive == True and folder.depth < 5: 
-				folder.recursive_directories()
+				folder.deletion_process()
 			elif folder.recursive == False: 
 				return
 
@@ -90,6 +94,7 @@ class Directory():
 		By default the Directory instances inherit the same directory specifications as defined in __init__. 
 		This method is only called directly before doing anything with the folder because it initiates a class instance and therefore determines the Directory instance age.  
 		"""
+		#TODO: make it possible for the subDirectory class instances to not neccesarily take the same arguments as the base instance
 		self.folders = [] 
 		for f in os.listdir(self.path):
 			if not os.path.isfile(os.path.join(self.path, f)):
@@ -180,4 +185,4 @@ class File():
 
 if __name__ == '__main__': 
 	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, whitelist=True, recursive = True)
-	dir.recursive_directories()
+	dir.deletion_process()
