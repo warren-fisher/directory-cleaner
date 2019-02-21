@@ -1,9 +1,10 @@
 import time
 import shutil
 import os 
+
+import errors
  
 #TODO: Tests
-
 
 """
 The following are user settings. 
@@ -24,13 +25,27 @@ incl_folders = False # Should this delete folders
 incl_files = True # Should this delete files 
 
 # Should probably only choose one of the following options, not both
-extensions = ['.txt'] # File extensions to use in blacklist OR whitelist
+extensions = ['.txt'] # File extensions to use in blacklist OR whitelist, include period
 whitelist = True 
 blacklist = False
 
 class Directory():
-	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, whitelist = None, blacklist = None, **kwargs):
-		"""A directory class is created so that class instances can be created to track user preferences of multiple directories."""
+	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, whitelist = None, blacklist = None, recursive = None, **kwargs):
+		"""
+		A directory class is created so that class instances can be created to track user preferences of multiple directories.
+		
+		Arguments:
+			path {str} -- The directory path.
+			incl_files {bool} -- Whether or not to include files in the deletion process.
+			incl_folders {bool} -- Whether or not to include folders in the deletion process.
+			delete_older_than {int} -- The file age required for a file to be deleted.
+			extensions {list} -- A list of strings which are file extensions to not delete. The extensions must start with a period. 
+		
+		Keyword Arguments:
+			whitelist {bool} -- Setting whether to use a whitelist for file extensions. Takes precedence over a blacklist. (default: {None})
+			blacklist {bool} -- Setting whether to use a blacklist for file extensions. Whitelist takes precedence. (default: {None})
+			recursive {bool} -- Whether or not to recursively apply the same deletion process to sub-directories. (default: {None})
+		"""
 		self.path = path
 		self.incl_files = incl_files
 		self.incl_folders = incl_folders
@@ -62,11 +77,11 @@ class Directory():
 
 	def deletion_process(self):
 		"""
-		Outside function to be called to initiate deleting of files. 
-		First it checks if recursive directory mode is enabled, and if so recalls itself.  
-		Once a directory is found that recursive directory mode is disabled, or the maximum search depth of 5 is reached,
-		the method then calls delete_files() for all directories searched. 
-		Finally if this is not the base directory we delete it, if set.
+		The main functions that starts the process of deleting all files, directories and subdirectories as specified by the user.
+
+		Initially it sets the folder attribute by calling the get_folders() function. 
+		If the user specified to recursively search directories it calls itself on those directories upto a depth of 5. 
+		Subsequently all files are deleted in the directory, and the directory itself is deleted if specified, as long as it's not the base directory. 
 		"""
 		self.get_folders()
 		for folder in self.folders:
@@ -164,8 +179,16 @@ class File():
 
 		For finding the extension of a file if it starts with a leading period, e.g: '.gitignore', 
 		the period is ignored since it's not a file extension. 
+		
+		Arguments:
+			path {string} -- The file path.
 		"""
-		self.path =  path
+
+		if os.path.isfile(os.path.join(path)):
+			self.path = path
+		else:
+			raise errors.NotAFileError
+			
 		_, self.extension = os.path.splitext(self.path) # The root of the file is not important
 
 		st = os.stat(self.path) # Creates a temporary named tuple
@@ -178,10 +201,7 @@ class File():
 		"""
 		Method to delete the file.
 		"""
-		try: 
-			os.remove(self.path) 
-		except OSError as e: # If the filepath does not exist we will get this error. 
-			print("No file error: {} - {}".format(e.filename, e.strerror))
+		os.remove(self.path) 
 
 if __name__ == '__main__': 
 	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, whitelist=True, recursive = True)
