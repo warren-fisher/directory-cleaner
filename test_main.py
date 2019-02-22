@@ -8,12 +8,13 @@ def test_dotfiles_extension(tmp_path):
     Creates a temporary .txt file and tests that the File class treats it as having no extension.
     
     Using the pytest tmp_path feature a temporary pathlib object is created for the base temporary directory.
-    Subsequently a empty file '.txt.' is created in this directory. 
+    Subsequently a file named '.txt' is created.
     Using the File class, if its file extension is empty, as expected, the test passes. 
     """
     d = tmp_path / "sub"
     d.mkdir()
     p = d / ".txt"
+    p.write_text('useless text')
     assert File(p).extension == ''
 
 def test_extension():
