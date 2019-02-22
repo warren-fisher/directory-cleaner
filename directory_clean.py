@@ -29,7 +29,7 @@ extensions = ['.txt'] # File extensions to use in blacklist OR whitelist
 blocklist = None # True = whitelist. False = Blacklist. None = no blocklist.
 
 class Directory():
-	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, blocklist, recursive = None, **kwargs):
+	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions = None, blocklist = None, recursive = None, **kwargs):
 		"""
 		A directory class is created so that class instances can be created to track user preferences of multiple directories.
 		
