@@ -17,7 +17,7 @@ The first value applies always and the second value applied for when the disk is
 
 incl_folders and incl_files are for setting whether script will delete folders, files or both 
 """
-dirname = r'c:\Users\warren\Downloads'
+dirname = r'c:\Users\warren\Downloads\temp'
 percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
 delete_older_than = 1 # Time, in seconds, before a file is deleted.
 incl_folders = False # Should this delete folders
@@ -25,11 +25,10 @@ incl_files = True # Should this delete files
 
 # Should probably only choose one of the following options, not both
 extensions = ['.txt'] # File extensions to use in blacklist OR whitelist
-whitelist = True 
-blacklist = False
+blocklist = None # True = whitelist. False = Blacklist. None = no blocklist.
 
 class Directory():
-	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, whitelist = None, blacklist = None, **kwargs):
+	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, blocklist=None, **kwargs):
 		"""A directory class is created so that class instances can be created to track user preferences of multiple directories."""
 		self.path = path
 		self.incl_files = incl_files
@@ -37,14 +36,7 @@ class Directory():
 
 		# A whitelist takes priority over a blacklist 
 		self.extensions = extensions
-		if whitelist is not None:
-			self.whitelist = whitelist
-		else: 
-			self.whitelist = False
-		if blacklist is not None and whitelist is None:
-			self.blacklist = blacklist
-		else:
-			self.blacklist = False
+		self.blocklist = blocklist
 			
 		disk_info = shutil.disk_usage(dirname) # Named tuple = usage(total, used, free)
 		self.percent_full = disk_info[2]/disk_info[0]
@@ -100,9 +92,9 @@ class Directory():
 			if not os.path.isfile(os.path.join(self.path, f)):
 				try:
 					self.depth
-					self.folders.append(Directory(os.path.join(self.path, f), self.incl_files, self.incl_folders, self.delete_older_than, self.extensions, depth = self.depth+1, recursive = True, whitelist = self.whitelist, blacklist = self.blacklist))
+					self.folders.append(Directory(os.path.join(self.path, f), self.incl_files, self.incl_folders, self.delete_older_than, self.extensions, depth = self.depth+1, recursive = True, blocklist = self.blocklist))
 				except AttributeError: # We get this error if there is no self.depth attribute (e.g it is the base directory and we haven't set its depth yet)
-					self.folders.append(Directory(os.path.join(self.path, f), self.incl_files, self.incl_folders, self.delete_older_than, self.extensions, depth = 1, recursive = True, whitelist = self.whitelist, blacklist = self.blacklist))
+					self.folders.append(Directory(os.path.join(self.path, f), self.incl_files, self.incl_folders, self.delete_older_than, self.extensions, depth = 1, recursive = True, blocklist = self.blocklist))
 
 	def delete_files(self):
 		"""
@@ -119,19 +111,13 @@ class Directory():
 			if file.age >= self.delete_older_than:
 				delete = True
 
-			try: 
-				if self.whitelist == True: 
-					if file.extension not in self.extensions: 
+			if self.blocklist == True: # If true it is a whitelist
+				if file.extension not in self.extensions: 
 						delete = False
-			except AttributeError: # An attribute error is raised if the whitelist is not set
-				pass 
 
-			try: 
-				if self.blacklist == True and self.whitelist in [False, None]: 
-					if file.extension in self.extensions: 
-						delete = False
-			except AttributeError: 
-				pass 
+			elif self.blocklist == False: # If false it is a blacklist
+				if file.extension in self.extensions: 
+					delete = False
 			
 			if delete == True: 
 				file.delete()
@@ -184,5 +170,5 @@ class File():
 			print("No file error: {} - {}".format(e.filename, e.strerror))
 
 if __name__ == '__main__': 
-	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, whitelist=True, recursive = True)
+	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, blocklist=blocklist, recursive = True)
 	dir.deletion_process()
