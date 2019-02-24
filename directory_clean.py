@@ -133,8 +133,11 @@ class Directory():
 				if file.extension in self.extensions: 
 					delete = False
 			
-			if delete == True: 
-				file.delete()
+			if delete == True:
+				try: 
+					file.delete()
+				except errors.NotAFileError:
+					pass
 
 	def get_files(self):
 		"""
