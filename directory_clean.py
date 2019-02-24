@@ -134,7 +134,7 @@ class Directory():
 					delete = False
 			
 			if delete == True: 
-				file.delete()
+					file.delete()
 
 	def get_files(self):
 		"""
