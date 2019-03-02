@@ -1,6 +1,7 @@
 import time
 import shutil
 import os 
+import pickle
 
 import errors
  
@@ -27,6 +28,39 @@ incl_files = True # Should this delete files
 # Should probably only choose one of the following options, not both
 extensions = ['.txt'] # File extensions to use in blacklist OR whitelist
 blocklist = None # True = whitelist. False = Blacklist. None = no blocklist.
+
+class DirectoryManager():
+	def __init__(self, path):
+		"""
+		A class to manage the user settings, namely multiple directories.
+
+		Arguments:
+			path {str} -- The path to the .pkl file where user settings are serialized.
+		"""
+		self.path = path
+
+	def save_directory(self, directory_obj):
+		"""
+		A function to save a Directory object to the user settings file.
+
+		Arguments:
+			directory_obj {Directory} -- A directory object to be serialized.
+		"""
+		with open(self.path, 'ba') as output:
+			pickle.dump(directory_obj, output, pickle.HIGHEST_PROTOCOL)
+
+	def load_directories(self):
+		"""
+		A function to return a list of Directory objects saved to the user settings file.
+		"""
+		with open(self.path, 'rb') as input:
+			objs = []
+			while True: 
+				try:
+					objs.append(pickle.load(input))
+				except EOFError:
+					break
+		return objs
 
 class Directory():
 	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions = None, blocklist = None, recursive = None, **kwargs):
@@ -76,10 +110,13 @@ class Directory():
 		"""
 		self.get_folders()
 		for folder in self.folders:
-			if folder.recursive == True and folder.depth < 5: 
-				folder.deletion_process()
-			elif folder.recursive == False: 
-				return
+			try:
+				if folder.recursive == True and folder.depth < 5: 
+					folder.deletion_process()
+				elif folder.recursive == False: 
+					return
+			except AttributeError:
+				pass
 
 		if self.incl_files == True: 
 			self.delete_files()
@@ -190,4 +227,9 @@ class File():
 
 if __name__ == '__main__': 
 	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, blocklist=blocklist, recursive = True)
+	dm = DirectoryManager(r'c:\Users\warren\Downloads\settings.pkl')
+	dm.save_directory(dir)
+	del dir
+
+	dir = dm.load_directories()[0]
 	dir.deletion_process()
