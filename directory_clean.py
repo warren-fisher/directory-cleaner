@@ -62,6 +62,20 @@ class DirectoryManager():
 					break
 		return objs
 
+	def remove_directory(self, directory_obj):
+		"""
+		Function to unpickle and then repickle all but the desired object. 
+		
+		Arguments:
+			directory_obj {Directory} -- An instance of the Directory object.
+		"""
+		objs = self.load_directories()
+		for obj in objs:
+			if obj == directory_obj:
+				continue
+			else:
+				self.save_directory(obj)
+
 class Directory():
 	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions = None, blocklist = None, recursive = None, **kwargs):
 		"""
@@ -192,6 +206,18 @@ class Directory():
 		except OSError as e: # If the folder does not exist we will get this error. 
 			print("No folder error: {} - {}".format(e.filename, e.strerror))
 
+	def __eq__(self, other):
+		"""
+		Function to compare the class attributes between two Directory instances.
+		
+		Arguments:
+			other {Directory} -- A Directory class instance.
+		
+		Returns:
+			Bool -- Returns True or False dependant on if the class instances have the same attributes.
+		"""
+		return self.__dict__ == other.__dict__
+
 class File():
 	def __init__(self, path):
 		"""
@@ -231,5 +257,5 @@ if __name__ == '__main__':
 	dm.save_directory(dir)
 	del dir
 
-	dir = dm.load_directories()[0]
-	dir.deletion_process()
+	for directory in dm.load_directories():
+		directory.deletion_process()
