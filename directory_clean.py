@@ -57,10 +57,19 @@ class DirectoryManager():
 			objs = []
 			while True: 
 				try:
-					objs.append(pickle.load(input))
+					# We could also run the Directory deletion_process() at this point.
+					# However, then when using remove_directory() it will clean the directory before removing it from being tracked - presumably the user does not want to clean that directory anymore! 
+					objs.append(pickle.load(input)) 
 				except EOFError:
 					break
 		return objs
+
+	def clean_directories(self):
+		"""
+		A method to clean all directories of unwanted files/folders. 
+		"""
+		for obj in self.load_directories():
+			obj.deletion_process()
 
 	def remove_directory(self, directory_obj):
 		"""
@@ -255,7 +264,4 @@ if __name__ == '__main__':
 	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, blocklist=blocklist, recursive = True)
 	dm = DirectoryManager(r'c:\Users\warren\Downloads\settings.pkl')
 	dm.save_directory(dir)
-	del dir
-
-	for directory in dm.load_directories():
-		directory.deletion_process()
+	dm.clean_directories()
