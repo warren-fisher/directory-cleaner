@@ -68,7 +68,8 @@ class DirectoryManager():
 		"""
 		A method to clean all directories of unwanted files/folders. 
 		"""
-		for obj in self.load_directories():
+		objs = self.load_directories()
+		for obj in objs:
 			obj.deletion_process()
 
 	def remove_directory(self, directory_obj):
