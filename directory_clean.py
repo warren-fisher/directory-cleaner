@@ -68,7 +68,12 @@ class DirectoryManager():
 		"""
 		A method to clean all directories of unwanted files/folders. 
 		"""
+<<<<<<< HEAD
 		for obj in self.load_directories():
+=======
+		objs = self.load_directories()
+		for obj in objs:
+>>>>>>> 7d388a79f5f4ec23dc6d50becee0ea0c6352d14a
 			obj.deletion_process()
 
 	def remove_directory(self, directory_obj):
@@ -78,7 +83,12 @@ class DirectoryManager():
 		Arguments:
 			directory_obj {Directory} -- An instance of the Directory object.
 		"""
+<<<<<<< HEAD
 		for obj in self.load_directories():
+=======
+		objs = self.load_directories()
+		for obj in objs:
+>>>>>>> 7d388a79f5f4ec23dc6d50becee0ea0c6352d14a
 			if obj == directory_obj:
 				continue
 			else:
