@@ -39,7 +39,7 @@ def test_fake_file():
     with pytest.raises(errors.NotAFileError):
         File('./fake_file_name')
 
-def test_file_age():
+def test_file_age(tmp_path, create_temp_file):
     """
     Test to make sure that only files of the appropriate age are deleted. 
     """
