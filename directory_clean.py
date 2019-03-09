@@ -20,6 +20,7 @@ The first value applies always and the second value applied for when the disk is
 incl_folders and incl_files are for setting whether script will delete folders, files or both 
 """
 dirname = r'c:\Users\warren\Downloads\temp'
+directory_storage = r'c:\Users\warren\Downloads\settings.pkl'
 percent_full_delete_threshold = 0.95 # If disk passes this threshold use second value for delete_older_than. 
 delete_older_than = 1 # Time, in seconds, before a file is deleted.
 incl_folders = False # Should this delete folders
@@ -71,21 +72,30 @@ class DirectoryManager():
 		for obj in self.load_directories():
 			obj.deletion_process()
 
-	def remove_directory(self, directory_obj):
+	def remove_directory(self, directory_path):
 		"""
 		Function to unpickle and then repickle all but the desired object. 
 		
 		Arguments:
 			directory_obj {Directory} -- An instance of the Directory object.
+
+		Errors: 
+			FileNotFoundError -- When the pickle file used to save directories is not present at the path then this error is thrown.
 		"""
+		obj_to_save = []
 		for obj in self.load_directories():
-			if obj == directory_obj:
+			if obj.path.lower() == directory_path.lower():
 				continue
 			else:
-				self.save_directory(obj)
+				obj_to_save.append(obj)
+
+		os.remove(self.path)
+		for obj in obj_to_save:
+			self.save_directory(obj)
 
 class Directory():
-	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions = None, blocklist = None, recursive = None, **kwargs):
+	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions = None, 
+                 blocklist = None, recursive = None, **kwargs):
 		"""
 		A directory class is created so that class instances can be created to track user preferences of multiple directories.
 		
@@ -264,6 +274,6 @@ class File():
 
 if __name__ == '__main__': 
 	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, blocklist=blocklist, recursive = True)
-	dm = DirectoryManager(r'c:\Users\warren\Downloads\settings.pkl')
+	dm = DirectoryManager(directory_storage)
 	dm.save_directory(dir)
 	dm.clean_directories()

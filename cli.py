@@ -1,7 +1,6 @@
 import click
 from directory_clean import Directory, DirectoryManager
-
-directory_storage = r'c:\Users\warren\Downloads\settings.pkl'
+from directory_clean import directory_storage as directory_storage
 
 @click.group()
 def main():
@@ -16,14 +15,23 @@ def main():
 @click.option('--extensions', default=None)
 @click.option('--recursive', default=False, type=bool)
 def track(path, files, folders, age, **kwargs):
+    global directory_storage
+    dm = DirectoryManager(directory_storage)
     d = Directory(path, files, folders, age, **kwargs)
-    dm = DirectoryManager(r'c:\Users\warren\Downloads\settings.pkl')
     dm.save_directory(d)
 
 @main.command()
 def clean():
-    dm = DirectoryManager(r'c:\Users\warren\Downloads\settings.pkl')
+    global directory_storage
+    dm = DirectoryManager(directory_storage)
     dm.clean_directories()
+
+@click.option('--path', required=True,type=str,help='Directory path')
+@main.command()
+def remove(path):
+    global directory_storage
+    dm = DirectoryManager(directory_storage)
+    dm.remove_directory(path)
 
 if __name__ == '__main__':
     main()
