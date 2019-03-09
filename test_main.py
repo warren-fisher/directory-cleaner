@@ -23,7 +23,6 @@ def test_dotfiles_extension(tmp_path, create_temp_file):
     Using the File class, if its file extension is empty, as expected, the test passes. 
     """
     path = create_temp_file(tmp_path, file_extension='txt')
-    print(path)
     assert File(path).extension == ''
 
 def test_extension():
@@ -43,10 +42,11 @@ def test_fake_file():
 def test_file_age():
     """
     Test to make sure that only files of the appropriate age are deleted. 
-    
-    [description]
     """
-    pass
+    path = create_temp_file(tmp_path, file_name='age', file_extension='txt')
+    pass 
+
+
     
 
 

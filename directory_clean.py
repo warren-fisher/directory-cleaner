@@ -1,6 +1,7 @@
 import time
 import shutil
 import os 
+import pickle
 
 import errors
  
@@ -28,8 +29,63 @@ incl_files = True # Should this delete files
 extensions = ['.txt'] # File extensions to use in blacklist OR whitelist
 blocklist = None # True = whitelist. False = Blacklist. None = no blocklist.
 
+class DirectoryManager():
+	def __init__(self, path):
+		"""
+		A class to manage the user settings, namely multiple directories.
+
+		Arguments:
+			path {str} -- The path to the .pkl file where user settings are serialized.
+		"""
+		self.path = path
+
+	def save_directory(self, directory_obj):
+		"""
+		A function to save a Directory object to the user settings file.
+
+		Arguments:
+			directory_obj {Directory} -- A directory object to be serialized.
+		"""
+		with open(self.path, 'ba') as output:
+			pickle.dump(directory_obj, output, pickle.HIGHEST_PROTOCOL)
+
+	def load_directories(self):
+		"""
+		A function to return a list of Directory objects saved to the user settings file.
+		"""
+		with open(self.path, 'rb') as input:
+			objs = []
+			while True: 
+				try:
+					# We could also run the Directory deletion_process() at this point.
+					# However, then when using remove_directory() it will clean the directory before removing it from being tracked - presumably the user does not want to clean that directory anymore! 
+					objs.append(pickle.load(input)) 
+				except EOFError:
+					break
+		return objs
+
+	def clean_directories(self):
+		"""
+		A method to clean all directories of unwanted files/folders. 
+		"""
+		for obj in self.load_directories():
+			obj.deletion_process()
+
+	def remove_directory(self, directory_obj):
+		"""
+		Function to unpickle and then repickle all but the desired object. 
+		
+		Arguments:
+			directory_obj {Directory} -- An instance of the Directory object.
+		"""
+		for obj in self.load_directories():
+			if obj == directory_obj:
+				continue
+			else:
+				self.save_directory(obj)
+
 class Directory():
-	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions, blocklist, recursive = None, **kwargs):
+	def __init__(self, path, incl_files, incl_folders, delete_older_than, extensions = None, blocklist = None, recursive = None, **kwargs):
 		"""
 		A directory class is created so that class instances can be created to track user preferences of multiple directories.
 		
@@ -76,10 +132,13 @@ class Directory():
 		"""
 		self.get_folders()
 		for folder in self.folders:
-			if folder.recursive == True and folder.depth < 5: 
-				folder.deletion_process()
-			elif folder.recursive == False: 
-				return
+			try:
+				if folder.recursive == True and folder.depth < 5: 
+					folder.deletion_process()
+				elif folder.recursive == False: 
+					return
+			except AttributeError:
+				pass
 
 		if self.incl_files == True: 
 			self.delete_files()
@@ -158,6 +217,18 @@ class Directory():
 		except OSError as e: # If the folder does not exist we will get this error. 
 			print("No folder error: {} - {}".format(e.filename, e.strerror))
 
+	def __eq__(self, other):
+		"""
+		Function to compare the class attributes between two Directory instances.
+		
+		Arguments:
+			other {Directory} -- A Directory class instance.
+		
+		Returns:
+			Bool -- Returns True or False dependant on if the class instances have the same attributes.
+		"""
+		return self.__dict__ == other.__dict__
+
 class File():
 	def __init__(self, path):
 		"""
@@ -193,4 +264,6 @@ class File():
 
 if __name__ == '__main__': 
 	dir = Directory(dirname, incl_files, incl_folders, delete_older_than, extensions = extensions, blocklist=blocklist, recursive = True)
-	dir.deletion_process()
+	dm = DirectoryManager(r'c:\Users\warren\Downloads\settings.pkl')
+	dm.save_directory(dir)
+	dm.clean_directories()
