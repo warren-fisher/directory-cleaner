@@ -239,6 +239,12 @@ class Directory():
 		"""
 		return self.__dict__ == other.__dict__
 
+	def __str__(self):
+		"""
+		String method to provide the command line utility to display to the user.
+		"""
+		return f"{self.path}"
+
 class File():
 	def __init__(self, path):
 		"""
