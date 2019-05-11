@@ -118,7 +118,7 @@ class Directory():
 		self.extensions = extensions
 		self.blocklist = blocklist
 			
-		disk_info = shutil.disk_usage(dirname) # Named tuple = usage(total, used, free)
+		disk_info = shutil.disk_usage(self.path) # Named tuple = usage(total, used, free)
 		self.percent_full = disk_info[2]/disk_info[0]
 
 		self.delete_older_than = delete_older_than

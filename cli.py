@@ -10,7 +10,7 @@ def main():
     pass
 
 @main.command()
-@click.option('--path', required=True, type=str, help='Directory path to add to tracking.')
+@click.option('--path', required=True, type=click.Path(path_type=str), help='Directory path to add to tracking.')
 @click.option('--files', required=True, type=bool, help='Should this script delete files?')
 @click.option('--folders', required=True, type=bool, help='Should this script delete folders?')
 @click.option('--age', required=True, type=int, help='Minimum age to delete folders and/or files.')
@@ -29,7 +29,14 @@ def clean():
     dm = DirectoryManager(directory_storage)
     dm.clean_directories()
 
-@click.option('--path', required=True,type=str,help='Directory path')
+@main.command()
+def directories():
+    global directory_storage
+    dm = DirectoryManager(directory_storage)
+    for value, directory in enumerate(dm.load_directories(),0):
+        print(f"{value} : {str(directory)}")
+
+@click.option('--path', required=True,type=str,help='Directory path to remove from being tracked.')
 @main.command()
 def remove(path):
     global directory_storage

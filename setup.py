@@ -18,6 +18,7 @@ setuptools.setup(
         'console_scripts':[
             'directory-cleaner = cli:main',
             'directory-clean = cli:main',
+            'dc = cli:main',
         ]
     },
     classifiers=[
