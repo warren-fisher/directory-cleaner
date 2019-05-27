@@ -4,7 +4,7 @@ import os
 import pickle
 
 import errors
- 
+
 #TODO: Tests
 
 """
@@ -59,7 +59,8 @@ class DirectoryManager():
 			while True: 
 				try:
 					# We could also run the Directory deletion_process() at this point.
-					# However, then when using remove_directory() it will clean the directory before removing it from being tracked - presumably the user does not want to clean that directory anymore! 
+					# However, then when using remove_directory() it will clean the directory before removing it 
+					# from being tracked - presumably the user does not want to clean that directory anymore! 
 					objs.append(pickle.load(input)) 
 				except EOFError:
 					break
@@ -270,7 +271,7 @@ class File():
 
 		# We run the age on __init__ because we will not save the file objects,
 		# rather they will be initiated each time the script is run. 
-		self.age = time.mktime(time.gmtime())-st.st_mtime # Equivalent to current_time - modified_time, in seconds
+		self.age = time.mktime(time.localtime())-st.st_mtime # Must use local time since st_mtime is in local time
 
 	def delete(self):
 		"""

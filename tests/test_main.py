@@ -2,6 +2,7 @@ import pytest
 from directory_clean import Directory, File 
 import errors
 import os
+from time import time, sleep
 
 @pytest.fixture(scope="session")
 def create_temp_file():
@@ -41,13 +42,15 @@ def test_fake_file():
 
 def test_file_age(tmp_path, create_temp_file):
     """
-    Test to make sure that only files of the appropriate age are deleted. 
+    Test to make sure that file age is correctly tested.
     """
+    start_time = time()
     path = create_temp_file(tmp_path, file_name='age', file_extension='txt')
-    pass 
-
-
-    
-
+    sleep(0.1)
+    f = File(path)
+    end_time = time()
+    time_taken = end_time - start_time
+    assert f.age == time_taken
+    assert f.age > 0.99*time_taken and f.age < 1.01*time_taken
 
 
