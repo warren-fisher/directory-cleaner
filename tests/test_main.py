@@ -50,7 +50,8 @@ def test_file_age(tmp_path, create_temp_file):
     f = File(path)
     end_time = time()
     time_taken = end_time - start_time
-    assert f.age == time_taken
-    assert f.age > 0.99*time_taken and f.age < 1.01*time_taken
+    # The os.stat() attribute st_mtime has a resolution of two seconds, 
+    # so the file age should be within 2 seconds of the time taken for the File to be initiated.
+    assert f.age >= time_taken - 2 and f.age <= time_taken + 2
 
 
