@@ -4,6 +4,7 @@ import errors
 import os
 from time import time, sleep
 
+
 @pytest.fixture(scope="session")
 def create_temp_file():
     # Returns a helper function to be used to generate files
@@ -14,6 +15,7 @@ def create_temp_file():
         path.write_text(text_string) # This step creates the file at that location.
         return path
     return _temp_file
+
 
 def test_dotfiles_extension(tmp_path, create_temp_file):
     """
@@ -26,6 +28,7 @@ def test_dotfiles_extension(tmp_path, create_temp_file):
     path = create_temp_file(tmp_path, file_extension='txt')
     assert File(path).extension == ''
 
+
 def test_extension():
     """
     Tests against the README.md file to make sure that its file extension is .md, using the File class.
@@ -33,12 +36,14 @@ def test_extension():
     f = File('./README.md')
     assert f.extension == '.md'
 
+
 def test_fake_file():
     """
     Tests the File class to make sure that an exception is raised if its path does not direct to a file. 
     """
     with pytest.raises(errors.NotAFileError):
         File('./fake_file_name')
+
 
 def test_file_age(tmp_path, create_temp_file):
     """
@@ -53,5 +58,3 @@ def test_file_age(tmp_path, create_temp_file):
     # The os.stat() attribute st_mtime has a resolution of two seconds, 
     # so the file age should be within 2 seconds of the time taken for the File to be initiated.
     assert f.age >= time_taken - 2 and f.age <= time_taken + 2
-
-
