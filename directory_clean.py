@@ -2,6 +2,7 @@ import time
 import shutil
 import os 
 import pickle
+import pathlib
 
 import errors
 
@@ -43,9 +44,9 @@ class DirectoryManager():
         A class to manage the user settings, namely multiple directories.
 
         Arguments:
-            path {str} -- The path to the .pkl file where user settings are serialized.
+            path {pathlib path object} -- The path to the .pkl file where user settings are serialized.
         """
-        self.path = path
+        self.path = pathlib.Path(path)
 
     def save_directory(self, directory_obj):
         """
@@ -54,16 +55,16 @@ class DirectoryManager():
         Arguments:
             directory_obj {Directory} -- A directory object to be serialized.
         """
-        with open(self.path, 'ba') as output:
+        with self.path.open(mode='ba') as output:
             pickle.dump(directory_obj, output, pickle.HIGHEST_PROTOCOL)
 
     def load_directories(self):
         """
         A function to return a list of Directory objects saved to the user settings file.
         """
-        with open(self.path, 'rb') as input:
+        with self.path.open(mode='rb') as input:
             objs = []
-            while True: 
+            while True:
                 try:
                     # We could also run the Directory deletion_process() at this point.
                     # However, then when using remove_directory() it will clean the directory before removing it
@@ -98,7 +99,7 @@ class DirectoryManager():
             else:
                 obj_to_save.append(obj)
 
-        os.remove(self.path)
+        os.remove(str(self.path))
         for obj in obj_to_save:
             self.save_directory(obj)
 
@@ -125,7 +126,11 @@ class Directory():
             recursive {bool} -- Whether or not to recursively apply
             the same deletion process to sub-directories. (default: {None})
         """
-        self.path = path
+
+        self.path = pathlib.Path(path)
+        if not self.path.is_dir():
+            raise errors.NotADirectoryError
+
         self.incl_files = incl_files
         self.incl_folders = incl_folders
 
@@ -133,12 +138,12 @@ class Directory():
         self.extensions = extensions
         self.blocklist = blocklist
 
-        disk_info = shutil.disk_usage(self.path)  # Named tuple = usage(total, used, free)
+        disk_info = shutil.disk_usage(str(self.path))  # Named tuple = usage(total, used, free)
         self.percent_full = disk_info[2]/disk_info[0]
 
         self.delete_older_than = delete_older_than
 
-        st = os.stat(self.path)  # Creates a temporary named tuple
+        st = self.path.stat()  # Creates a temporary named tuple
 
         # We run the age on __init__ because we will not save the file objects,
         # rather they will be initiated each time the script is run. 
@@ -187,16 +192,17 @@ class Directory():
         """
         #TODO: make it possible for the subDirectory class instances to not neccesarily take the same arguments as the base instance
         self.folders = [] 
-        for f in os.listdir(self.path):
-            if not os.path.isfile(os.path.join(self.path, f)):
+        for f in self.path.list_dir():
+            if f.is_dir():
                 try:
                     self.depth
-                    self.folders.append(Directory(os.path.join(self.path, f), self.incl_files,
+                    self.folders.append(Directory(f, self.incl_files,
                                                   self.incl_folders, self.delete_older_than,
                                                   self.extensions, depth=self.depth+1,
                                                   recursive=True, blocklist=self.blocklist))
-                except AttributeError: # We get this error if there is no self.depth attribute (e.g it is the base directory and we haven't set its depth yet)
-                    self.folders.append(Directory(os.path.join(self.path, f), self.incl_files,
+                # We get this error if there is no self.depth attribute (e.g it is the base directory and we haven't set its depth yet)
+                except AttributeError: 
+                    self.folders.append(Directory(f, self.incl_files,
                                                   self.incl_folders, self.delete_older_than,
                                                   self.extensions, depth = 1, recursive=True,
                                                   blocklist=self.blocklist))
@@ -211,23 +217,23 @@ class Directory():
         """
         self.get_files()
 
-        for file in self.files:
+        for f in self.files:
             delete = False
 
-            if file.age >= self.delete_older_than:
+            if f.age >= self.delete_older_than:
                 delete = True
 
             if self.blocklist:  # If true it is a whitelist
-                if file.extension not in self.extensions:
+                if f.extension not in self.extensions:
                         delete = False
 
             elif self.blocklist:  # If false it is a blacklist
-                if file.extension in self.extensions:
+                if f.extension in self.extensions:
                     delete = False
-          
+
             if delete:
                 try:
-                    file.delete()
+                    f.delete()
                 except errors.NotAFileError:
                     pass
 
@@ -239,14 +245,14 @@ class Directory():
         This is only called directly before deleting files because when creating the class instance for each file the File age is set. 
         """
         self.files = []
-        for f in os.listdir(self.path):
-            if os.path.isfile(os.path.join(self.path, f)):
-                self.files.append(File(os.path.join(self.path, f)))
+        for f in self.path.iterdir(): 
+            if f.is_file(): 
+                self.files.append(File(f))
 
     def delete(self):
         """Method to delete the directory."""
         try:
-            shutil.rmtree(self.path)
+            shutil.rmtree(str(self.path))
         except OSError as e:  # If the folder does not exist we will get this error. 
             print("No folder error: {} - {}".format(e.filename, e.strerror))
 
@@ -266,7 +272,7 @@ class Directory():
         """
         String method to provide the command line utility to display to the user.
         """
-        return f"{self.path}"
+        return str(self.path)
 
 
 class File():
@@ -274,23 +280,20 @@ class File():
         """
         A file class to store attributes such as age, path, and extension type. 
 
-        Path is an os.path instance. 
-
         For finding the extension of a file if it starts with a leading period, e.g: '.gitignore', 
         the period is ignored since it's not a file extension. 
 
         Arguments:
-            path {string} -- The file path.
+            path {string or pathlib object} -- The file path.
         """
 
-        if os.path.isfile(os.path.join(path)):
-            self.path = path
-        else:
+        self.path = pathlib.Path(path)
+        if not self.path.is_file():
             raise errors.NotAFileError
 
-        _, self.extension = os.path.splitext(self.path) # The root of the file is not important
+        _, self.extension = os.path.splitext(str(self.path)) # The root of the file is not important
 
-        st = os.stat(self.path) # Creates a temporary named tuple
+        st = self.path.stat()  # Creates a temporary named tuple
 
         # We run the age on __init__ because we will not save the file objects,
         # rather they will be initiated each time the script is run. 
@@ -300,7 +303,7 @@ class File():
         """
         Method to delete the file.
         """
-        os.remove(self.path) 
+        os.remove(str(self.path)) 
 
 
 if __name__ == '__main__':
