@@ -3,4 +3,8 @@ __pycache__/
 directory_cleaner.egg-info/
 dist/
 build/
+<<<<<<< HEAD
 .vscode
+=======
+.vscode/
+>>>>>>> Added testing for File init()
