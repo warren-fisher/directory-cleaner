@@ -5,7 +5,7 @@ import pickle
 
 import errors
 
-#TODO: Tests
+# TODO: Tests
 
 """
 The following are user settings.
@@ -68,7 +68,7 @@ class DirectoryManager():
                     # We could also run the Directory deletion_process() at this point.
                     # However, then when using remove_directory() it will clean the directory before removing it
                     # from being tracked - presumably the user does not want to clean that directory anymore!
-                    objs.append(pickle.load(input)) 
+                    objs.append(pickle.load(input))
                 except EOFError:
                     break
         return objs
@@ -115,7 +115,7 @@ class Directory():
             incl_files {bool} -- Whether or not to include files in the deletion process.
             incl_folders {bool} -- Whether or not to include folders in the deletion process.
             delete_older_than {int} -- The file age required for a file to be deleted.
-            extensions {list} -- A list of strings which are file extensions to not delete. 
+            extensions {list} -- A list of strings which are file extensions to not delete.
             The extensions must start with a period. 
 
         Keyword Arguments:
@@ -224,7 +224,7 @@ class Directory():
             elif self.blocklist:  # If false it is a blacklist
                 if file.extension in self.extensions:
                     delete = False
-          
+
             if delete:
                 try:
                     file.delete()
@@ -272,12 +272,12 @@ class Directory():
 class File():
     def __init__(self, path):
         """
-        A file class to store attributes such as age, path, and extension type. 
+        A file class to store attributes such as age, path, and extension type.
 
-        Path is an os.path instance. 
+        Path is an os.path instance.
 
-        For finding the extension of a file if it starts with a leading period, e.g: '.gitignore', 
-        the period is ignored since it's not a file extension. 
+        For finding the extension of a file if it starts with a leading period, 
+        e.g: '.gitignore', the period is ignored since it's not a file extension.
 
         Arguments:
             path {string} -- The file path.
@@ -288,14 +288,15 @@ class File():
         else:
             raise errors.NotAFileError
 
-        _, self.extension = os.path.splitext(self.path) # The root of the file is not important
+        _, self.extension = os.path.splitext(self.path)  # The root of the file is not important
 
-        st = os.stat(self.path) # Creates a temporary named tuple
+        st = os.stat(self.path)  # Creates a temporary named tuple
 
         # We run the age on __init__ because we will not save the file objects,
         # rather they will be initiated each time the script is run. 
-        self.age = time.mktime(time.localtime())-st.st_mtime # Must use local time since st_mtime is in local time
-
+        # Must use local time since st_mtime is in local time
+        self.age = time.mktime(time.localtime())-st.st_mtime
+        
     def delete(self):
         """
         Method to delete the file.

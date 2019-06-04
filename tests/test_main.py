@@ -11,8 +11,8 @@ def create_temp_file():
     def _temp_file(tmp_path, file_name='', file_extension='', text_string='CONTENT'):
         directory = tmp_path / "sub"
         directory.mkdir()
-        path = directory / "{}.{}".format(file_name ,file_extension)
-        path.write_text(text_string) # This step creates the file at that location.
+        path = directory / "{}.{}".format(file_name, file_extension)
+        path.write_text(text_string)  # This step creates the file at that location.
         return path
     return _temp_file
 
@@ -29,12 +29,13 @@ def test_dotfiles_extension(tmp_path, create_temp_file):
     assert File(path).extension == ''
 
 
-def test_extension():
+def test_extension(tmp_path, create_temp_file):
     """
     Tests against the README.md file to make sure that its file extension is .md, using the File class.
     """
-    f = File('./README.md')
-    assert f.extension == '.md'
+    temp_file = create_temp_file(tmp_path, file_extension='txt', file_name='txt')
+    f = File(temp_file)
+    assert f.extension == '.txt'
 
 
 def test_fake_file():
@@ -69,3 +70,11 @@ def test_file_init(tmp_path, create_temp_file):
 def test_empty_file_init():
     with pytest.raises(TypeError):
         File()
+
+
+def test_file_deletion(tmp_path, create_temp_file):
+    temp_file = create_temp_file(tmp_path, file_extension='txt', file_name='txt')
+    f = File(temp_file)
+    f.delete()
+    with pytest.raises(FileNotFoundError):
+        f.delete()
