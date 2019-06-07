@@ -63,16 +63,14 @@ class DirectoryManager():
         A function to return a list of Directory objects saved to the user settings file.
         """
         with self.path.open(mode='rb') as input:
-            objs = []
             while True:
                 try:
                     # We could also run the Directory deletion_process() at this point.
                     # However, then when using remove_directory() it will clean the directory before removing it
                     # from being tracked - presumably the user does not want to clean that directory anymore!
-                    objs.append(pickle.load(input)) 
+                    yield pickle.load(input) 
                 except EOFError:
                     break
-        return objs
 
     def clean_directories(self):
         """
@@ -128,6 +126,7 @@ class Directory():
         """
 
         self.path = pathlib.Path(path)
+        print(self.path)
         if not self.path.is_dir():
             raise errors.NotADirectoryError
 
@@ -192,7 +191,7 @@ class Directory():
         """
         #TODO: make it possible for the subDirectory class instances to not neccesarily take the same arguments as the base instance
         self.folders = [] 
-        for f in self.path.list_dir():
+        for f in self.path.iterdir():
             if f.is_dir():
                 try:
                     self.depth

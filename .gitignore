@@ -4,3 +4,4 @@ directory_cleaner.egg-info/
 dist/
 build/
 .vscode
+*.code-workspace
