@@ -1,7 +1,6 @@
 import pytest
-from directory_clean import Directory, File
+from directory_clean import File
 import errors
-import os
 from time import time, sleep
 
 

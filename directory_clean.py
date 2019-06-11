@@ -47,6 +47,11 @@ class DirectoryManager():
             path {pathlib path object} -- The path to the .pkl file where user settings are serialized.
         """
         self.path = pathlib.Path(path)
+        if File(path).extension == '.pkl': 
+            # If the path does not lead to a file a NotAFileError is raised in the File class
+            pass
+        else:
+            raise errors.NotASettingsFile
 
     def save_directory(self, directory_obj):
         """
@@ -68,11 +73,7 @@ class DirectoryManager():
                     # We could also run the Directory deletion_process() at this point.
                     # However, then when using remove_directory() it will clean the directory before removing it
                     # from being tracked - presumably the user does not want to clean that directory anymore!
-<<<<<<< HEAD
-                    objs.append(pickle.load(input))
-=======
                     yield pickle.load(input) 
->>>>>>> add-pathlib
                 except EOFError:
                     break
 
@@ -159,7 +160,7 @@ class Directory():
         """
         The main functions that starts the process of deleting all files, directories and subdirectories as specified by the user.
 
-        Initially it sets the folder attribute by calling the get_folders() function. 
+        Initially it sets the folder attribute by calling the get_folders() function.
         If the user specified to recursively search directories it calls itself on those directories upto a depth of 5. 
         Subsequently all files are deleted in the directory, and the directory itself is deleted if specified, as long as it's not the base directory. 
         """
@@ -283,15 +284,8 @@ class File():
         """
         A file class to store attributes such as age, path, and extension type.
 
-<<<<<<< HEAD
-        Path is an os.path instance.
-
-        For finding the extension of a file if it starts with a leading period, 
-        e.g: '.gitignore', the period is ignored since it's not a file extension.
-=======
         For finding the extension of a file if it starts with a leading period, e.g: '.gitignore', 
         the period is ignored since it's not a file extension. 
->>>>>>> add-pathlib
 
         Arguments:
             path {string or pathlib object} -- The file path.
@@ -301,15 +295,9 @@ class File():
         if not self.path.is_file():
             raise errors.NotAFileError
 
-<<<<<<< HEAD
-        _, self.extension = os.path.splitext(self.path)  # The root of the file is not important
-
-        st = os.stat(self.path)  # Creates a temporary named tuple
-=======
         _, self.extension = os.path.splitext(str(self.path)) # The root of the file is not important
 
         st = self.path.stat()  # Creates a temporary named tuple
->>>>>>> add-pathlib
 
         # We run the age on __init__ because we will not save the file objects,
         # rather they will be initiated each time the script is run. 
