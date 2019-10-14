@@ -25,7 +25,7 @@ Only standard library modules are used.
 #### Windows 
 
 1. Clone the github repo to a folder using
-- `git clone https://github.com/warren-fisher/directory-cleaner-by-age.git folder_name`
+- `git clone https://github.com/warren-fisher/directory-cleaner.git folder_name`
 
 2. Create a windows batch file somewhere on your computer that references the clean-by-age.py script
 - `python C:path\clean-by-age.py`
