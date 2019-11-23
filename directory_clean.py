@@ -1,12 +1,10 @@
 import time
 import shutil
-import os 
+import os
 import pickle
 import pathlib
 
 import errors
-
-# TODO: Tests
 
 """
 The following are user settings.
@@ -194,7 +192,6 @@ class Directory():
         By default the Directory instances inherit the same directory specifications as defined in __init__. 
         This method is only called directly before doing anything with the folder because it initiates a class instance and therefore determines the Directory instance age.  
         """
-        #TODO: make it possible for the subDirectory class instances to not neccesarily take the same arguments as the base instance
         self.folders = [] 
         for f in self.path.iterdir():
             if f.is_dir():

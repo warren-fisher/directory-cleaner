@@ -13,12 +13,8 @@
 
 ## Getting Started
 
-Getting started is easy. This script has no dependancies other than Python3. It is not currently on Pip. 
-
-### Prerequisites
-
-Python 3.6.5 is supported.
-Only standard library modules are used.
+Getting started is easy. Python 3.6 is the lowest supported version because of F-strings.
+The only dependency is Click, which is used for the command-line interface.
 
 ### Installing
 
