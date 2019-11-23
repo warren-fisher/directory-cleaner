@@ -1,4 +1,7 @@
 import pytest
+import os, sys
+# Modify path so that files can be properly imported without having to install the setup.py
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from directory_clean import DirectoryManager
 import errors
 from test_File import create_temp_file as create_temp_file

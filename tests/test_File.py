@@ -1,4 +1,7 @@
 import pytest
+import sys, os
+# Modify path so that files can be properly imported without having to install the setup.py
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from directory_clean import File
 import errors
 from time import time, sleep
@@ -39,7 +42,7 @@ def test_extension(tmp_path, create_temp_file):
 
 def test_fake_file():
     """
-    Tests the File class to make sure that an exception is raised if its path does not direct to a file. 
+    Tests the File class to make sure that an exception is raised if its path does not direct to a file.
     """
     with pytest.raises(errors.NotAFileError):
         File('./fake_file_name')
