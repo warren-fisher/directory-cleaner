@@ -18,7 +18,7 @@ The only dependency is Click, which is used for the command-line interface.
 
 ### Installing
 
-#### Windows 
+#### Windows
 
 1. Clone the github repo to a folder using
 
