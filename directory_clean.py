@@ -129,7 +129,6 @@ class Directory():
         """
 
         self.path = pathlib.Path(path)
-        print(self.path)
         if not self.path.is_dir():
             raise errors.NotADirectoryError
 
@@ -255,7 +254,7 @@ class Directory():
         try:
             shutil.rmtree(str(self.path))
         except OSError as e:  # If the folder does not exist we will get this error. 
-            print("No folder error: {} - {}".format(e.filename, e.strerror))
+            print(f"No folder error: {e.filename} - {e.strerror}")
 
     def __eq__(self, other):
         """
@@ -306,7 +305,34 @@ class File():
         Method to delete the file.
         """
         os.remove(str(self.path)) 
+        
+    def __eq__(self, other):
+        """
+        Compare two instances of the File class, or compare a path string or Pathlib object
+        to see if it has the same path as this file.
+        """
+        if type(other) == type(""):
+            return self.path == other
 
+        return str(self.path) == str(other)
+    
+    def __lt__(self, other):
+        """
+        Compare two instances of the File class, or compare a path string or Pathlib object
+        to see if the other instance is less than this instance.
+        """
+        if type(other) == type(""):
+            return self.path > other
+        return self.path > other
+        
+    def __gt__(self, other):
+        """
+        Compare two instances of the File class, or compare a path string or Pathlib object
+        to see if the other instance is greater than this instance.
+        """
+        if type(other) == type(""):
+            return self.path > other
+        return self.path > other
 
 if __name__ == '__main__':
     dir = Directory(dirname, incl_files, incl_folders, delete_older_than, 

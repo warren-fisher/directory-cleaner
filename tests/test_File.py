@@ -10,10 +10,11 @@ from time import time, sleep
 @pytest.fixture(scope="session")
 def create_temp_file():
     # Returns a helper function to be used to generate files
-    def _temp_file(tmp_path, file_name='', file_extension='', text_string='CONTENT'):
-        directory = tmp_path / "sub"
-        directory.mkdir()
-        path = directory / "{}.{}".format(file_name, file_extension)
+    def _temp_file(tmp_path, file_name='', file_extension='', text_string='CONTENT', directory=None):
+        if directory is None:
+            directory = tmp_path / "sub"
+            directory.mkdir()
+        path = directory / f"{file_name}.{file_extension}"
         path.write_text(text_string)  # This step creates the file at that location.
         return path
     return _temp_file
@@ -54,14 +55,13 @@ def test_file_age(tmp_path, create_temp_file):
     """
     start_time = time()
     path = create_temp_file(tmp_path, file_name='age', file_extension='txt')
-    sleep(0.1)
+    sleep(4)
     f = File(path)
     end_time = time()
     time_taken = end_time - start_time
     # The os.stat() attribute st_mtime has a resolution of two seconds,
     # so the file age should be within 2 seconds of the time taken for the File to be initiated.
-    assert f.age >= time_taken - 2 and f.age <= time_taken + 2
-
+    assert time_taken - 2 <= f.age <= time_taken + 2
 
 def test_file_init(tmp_path, create_temp_file):
     temp_file = create_temp_file(tmp_path, file_extension='txt', file_name='txt')
